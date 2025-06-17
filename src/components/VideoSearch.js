@@ -1,7 +1,5 @@
-// components/VideoSearch.js
-
 import React, { useState } from 'react';
-import './VideoSearch.css'; // optional if styling is present
+import './VideoSearch.css';
 
 function VideoSearch() {
     const [topic, setTopic] = useState('');
@@ -11,7 +9,7 @@ function VideoSearch() {
 
     const handleGenerate = async () => {
         if (!topic.trim()) {
-            alert('Please enter a topic!');
+            setError('Please enter a topic!');
             return;
         }
 
@@ -20,21 +18,22 @@ function VideoSearch() {
         setError('');
 
         try {
-            const response = await fetch('/api/proxy', {
+            const response = await fetch('/api/youtube-titles', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ topic }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: topic }),
             });
 
-            if (!response.ok) throw new Error('Failed to fetch titles');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch titles');
+            }
 
             const data = await response.json();
-            setTitles(data.titles || []);
+            setTitles(Array.isArray(data.titles) ? data.titles : [data]);
         } catch (err) {
             console.error(err);
-            setError('Something went wrong 💔 Please try again.');
+            setError(err.message || 'Something went wrong 💔 Please try again.');
         } finally {
             setLoading(false);
         }
@@ -49,9 +48,10 @@ function VideoSearch() {
                 placeholder="Enter video topic..."
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
+                disabled={loading}
             />
 
-            <button onClick={handleGenerate} disabled={loading}>
+            <button onClick={handleGenerate} disabled={loading || !topic.trim()}>
                 {loading ? 'Generating...' : 'Generate Titles'}
             </button>
 
