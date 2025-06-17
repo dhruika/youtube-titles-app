@@ -8,22 +8,12 @@
                 "POST"
             ],
             "headers": {
-                "Content-Type": "application/json",
-                "Cache-Control": "no-cache" // Prevent caching for dynamic content
-            }
-        },
-        {
-            "src": "/static/(.*)",
-            "headers": {
-                "Cache-Control": "public, max-age=31536000, immutable" // Cache static files
+                "Content-Type": "application/json"
             }
         },
         {
             "src": "/(.*)",
-            "dest": "/index.html", // Required for SPAs (e.g., React)
-            "headers": {
-                "Cache-Control": "no-cache" // Disable cache for HTML
-            }
+            "dest": "/index.html"
         }
     ]
 }
